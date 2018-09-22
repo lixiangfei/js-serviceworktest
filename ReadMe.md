@@ -75,3 +75,32 @@
         2.当用户导航到别的网页，因此释放了旧的ServiceWorker时候
         3.指定的时间过去后，释放了之前的ServiceWorker
     这个时候ServiceWorker的生命周期进入Activaing阶段，ServiceWorker子线程接收到activate事件
+
+
+### Worker
+    ServiceWorker基于Worker
+
+    Web Workers使得一个Web应用程序可以在与主执行线程分离的后台线程中运行一个脚本程序。这样的好处是可以在一个单独的线程中执行耗时的处理任务，从而允许主线程运行而不被阻塞。
+
+    它的作用就是给JS创造多线程运行环境，允许主线程创建worker线程，分配任务给后者，主线程运行的同时worker线程也在执行，相互不干扰，在worker线程运行结束后把结果返回给主线程。这样做的好处是主线程可以把计算密集型或高延迟的任务交给worker线程执行，这样主线程就会变得轻松，不会被阻塞或拖慢。这并不意味JS语言本身支持了多线程能力，而是浏览器作为宿主环境提供了JS一个多线程运行的环境。
+
+    不过worker一旦建立，就会一直运行，不会被主线程打断，这样有利于随时相应主线程的通行，但也会造成资源的两肺，所以不应该过度使用。或者说：如果worker无实例引用，改worker空闲后立即被关闭；如果worker实例引用不为0，该worker空闲也不会被关闭
+
+### Worker兼容性
+    Browser	    IE	    Edge	FireFox	    Chrome	    Safari
+    version	    10+	     12+	   3.5+	    4+	        4+
+
+
+### 限制
+    1.同源限制 worker线程执行的脚本文件必须和主线程的脚本文件同源
+    2.文件限制  为了安全，worker线程无法读取本地文件，它所加载的脚本必须来自网络，且需要与主线程的脚本同源
+    3.DOM操作限制  worker线程在与主线程的window的不同的另一个全局上下文运行，其中无法读取主线程所在网页的DOM对象，也不能获取document,window等对象，但是可以获取navigator，location（只读），XMLHttpRequest，setTimeout等浏览器API
+    4.通信限制 worker线程与主线程不再同一个上下文，不能直接通信，需要通过postMessage方法来通信
+    5.脚本限制 worker线程不能执行alert,confir,但可以使用XMLHttpRequest对象发出ajax请求
+
+### api
+    postMessage(amessage, transferList) 方法接受两个参数，amessage可以是传递任何类型数据，包括对象，这种通信是拷贝关系，修改不会影响到主线程。
+        内部是先通信内容串行化，然后将字符传发给worker,在还原。
+        一个可选的 Transferable对象的数组，用于传递所有权。如果一个对象的所有权被转移，在发送它的上下文中将变为不可用（中止），并且只有在它被发送到的worker中可用。可转移对象是如ArrayBuffer，MessagePort或ImageBitmap的实例对象，transferList数组中不可传入null。
+    
+    NOTE:ES2017 引入SharedArrayBuffer，允许 Worker 线程与主线程共享同一块内存。

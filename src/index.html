@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        Worker 输出内容：<span id='app'></span>
+
+        <input type='text' title='' id='msg'>
+
+        <button onclick='sendMessage()'>发送</button>
+
+        <button onclick='stopWorker()'>stop!</button>
+    </div>
+
+    <script>
+        if(typeof Worker === 'undefined'){
+            document.writeln('Worker not supported')
+        }else{
+            var elemApp = document.getElementById('app');
+            var elemMsg = document.getElementById('msg');
+            window.w = new Worker('workerThread.js');
+            // /指定worker线程发消息时的回调 addEventListener('message', ev=>{})
+            window.w.onmessage   = ev => {
+                elemApp.innerHTML = ev.data;
+            }
+
+            //指定worker线程发生错误时的回调
+            window.w.onerror = err => {
+                w.terminate();
+                console.log(`${err.filename} ${err.lineno} ${err.message}`);
+            }
+
+            function sendMessage(){
+                var msg = elemMsg.value;
+                console.log(`sendMessage:${msg}`);
+                window.w.postMessage(msg)
+            }
+
+            function stopWorker(){
+                window.w.terminate();
+            }
+        }
+    </script>
+</body>
+</html>
