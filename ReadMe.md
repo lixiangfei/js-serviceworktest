@@ -104,3 +104,35 @@
         一个可选的 Transferable对象的数组，用于传递所有权。如果一个对象的所有权被转移，在发送它的上下文中将变为不可用（中止），并且只有在它被发送到的worker中可用。可转移对象是如ArrayBuffer，MessagePort或ImageBitmap的实例对象，transferList数组中不可传入null。
     
     NOTE:ES2017 引入SharedArrayBuffer，允许 Worker 线程与主线程共享同一块内存。
+
+### 使用场景
+    1.加密数据  有些加解密算法比较浮渣，或者在加密很多数据时候计算会很耗时，导致UI线程无响应，可以使用worker
+    2.预取数据  有时候为了提升数据加载速度，可以提前使用worker线程和获取数据，因为Worker线程可以用XMLHttpRequest
+    3.预渲染 在某些渲染场景下，比如渲染复杂的canvas的时候需要计算的效果比如反射，折射等，这些逻辑可以使用Worker线程来执行，也可以使用多个Worker线程
+    4.复杂数据处理  某些检索，排序，过滤，分析会耗时
+    5.预加载图片 如果图片很多或者图片比较大，如果业务限制不考虑懒加载，也可以使用web worker来加载图片
+
+
+    let w = new Worker('');
+    w.onmessage = function(evt){
+        var img = document.createElement('img')
+        img.src = window.URL.crateObjectURL(evt.data);
+        //add
+    }
+
+    //worker
+    let arr = [];
+
+    for(let i = 0; i < arr.length; i++){
+        let req = new XMLHttpRequest();
+        req.open('GET', arr[i],true);
+        requ.resonpseType = "blob";
+        req.onreadystatechange = () => {
+            if (req.readyState == 4) {
+                postMessage(req.response);
+            }
+        }
+        req.send(null);
+    }
+
+ 
